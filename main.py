@@ -86,7 +86,7 @@ if __name__ == '__main__':
         if opt.mode == 'baseline':
             Trainer.train_epoch_baseline(epoch)
         elif opt.mode == 'POSE':
-            augnet = Trainer.train_epoch_POSE(augnets, epoch)
+            augnet = Trainer.train_epoch_POSE(augnets, epoch) #每一次返回一个 aug——net
             augnets.append(augnet)
         else:
             logger.info('not defined mode')

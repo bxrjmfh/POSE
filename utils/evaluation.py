@@ -54,7 +54,8 @@ def get_curve_online(known, novel, stypes = ['Bas']):
 
 
 def metric_ood(x1, x2, stypes = ['Bas'], verbose=True):
-    tp, fp, tnr_at_tpr95 = get_curve_online(x1, x2, stypes)
+    tp, fp, tnr_at_tpr95 = get_curve_online(x1, x2, stypes) 
+    # tnr_at_tpr95 就是在已知类别分类正确率在 95 以上的时候，未知类别分类为真的比例 tnr=1-fpr
     results = dict()
     mtypes = ['TNR', 'AUROC', 'DTACC', 'AUIN', 'AUOUT']
     if verbose:
@@ -75,7 +76,7 @@ def metric_ood(x1, x2, stypes = ['Bas'], verbose=True):
             print(' {val:6.3f}'.format(val=results[stype][mtype]), end='')
         
         # AUROC
-        mtype = 'AUROC'
+        mtype = 'AUROC' # TPR 和 fpr 曲线的面积
         tpr = np.concatenate([[1.], tp[stype]/tp[stype][0], [0.]])
         fpr = np.concatenate([[1.], fp[stype]/fp[stype][0], [0.]])
         roc_auc = 100.*(-np.trapz(1.-fpr, tpr))
@@ -87,7 +88,7 @@ def metric_ood(x1, x2, stypes = ['Bas'], verbose=True):
             print(' {val:6.3f}'.format(val=results[stype][mtype]), end='')
         
         # DTACC
-        mtype = 'DTACC'
+        mtype = 'DTACC' # for all theta s.t. tpr + tnr == max
         results[stype][mtype] = 100.*(.5 * (tp[stype]/tp[stype][0] + 1.-fp[stype]/fp[stype][0]).max())
         if verbose:
             print(' {val:6.3f}'.format(val=results[stype][mtype]), end='')

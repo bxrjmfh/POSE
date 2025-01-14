@@ -97,7 +97,7 @@ class PGTrainer():
 
             # reconstruction loss
             aug_img = augnet(input_img.detach())
-            loss_mse = self.criterionMSE(aug_img, input_img)
+            loss_mse = self.criterionMSE(aug_img, input_img) # 增强前后的对比
             loss_A = torch.clamp(loss_mse, self.config.mse_lowbound)
             losses.update({'loss_mse': loss_A.item()})
 
@@ -106,7 +106,7 @@ class PGTrainer():
 
             if len(augnets) >= 1:
                 # close to known samples
-                loss_close_known = torch.clamp(1 - torch.mean(self.cos(input_fea, aug_fea)), 1 - self.config.known_sim_limit) # larger similarity 
+                loss_close_known = torch.clamp(1 - torch.mean(self.cos(input_fea, aug_fea)), 1 - self.config.known_sim_limit) # larger similarity 模型特征的相似度
                 losses.update({'loss_close_known': loss_close_known.item()})
                 loss_A += self.config.w_close_known * loss_close_known
 
@@ -116,7 +116,7 @@ class PGTrainer():
                 _, aug_fea_pre = self.model(aug_img_pre, data=self.config.input_data)
                 loss_distant_preaug = torch.mean(self.cos(aug_fea, aug_fea_pre)) # smaller similarity 
                 losses.update({'loss_distant_preaug': loss_distant_preaug.item()})
-                loss_A += self.config.w_dist_pre * loss_distant_preaug
+                loss_A += self.config.w_dist_pre * loss_distant_preaug #在 Aug模型的训练中，pixel域的重建误差（L_{recons}）+频域的重建误差（L_{div}）
 
             loss_A.backward()
             optimizerA.step()
@@ -129,7 +129,7 @@ class PGTrainer():
             set_requires_grad([augnet], False)
             
             input_prob, input_fea = self.model(input_img, data=self.config.input_data)
-            input_prob, loss_cls = self.criterion(input_fea, input_prob, label)
+            input_prob, loss_cls = self.criterion(input_fea, input_prob, label) #MSE loss
 
             # get augnet data and labels
             aug_img = augnet(input_img) 
