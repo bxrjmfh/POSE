@@ -47,9 +47,13 @@ if __name__ == '__main__':
     model_dir, train_data_path, val_data_path = get_train_paths(data_list, opt.config_name, run_dir)
     test_data_path, out_data_path = data_list['test_data_path'], data_list['out_data_path']
     config.known_classes = data_list['known_classes']
-    config.unknown_classes1, config.unknown_classes2, config.unknown_classes3 = data_list['unknown_classes1'], data_list['unknown_classes2'], data_list['unknown_classes3']
-    config.unknown_classes = config.unknown_classes1 + config.unknown_classes2 + config.unknown_classes3
-    config.class_num = len(config.known_classes)  
+    config.class_num = len(data_list['known_classes'])  
+    print(f'\n-------class num {config.class_num}-------\n')
+    if 'split' in opt.data:
+        config.unknown_classes1, config.unknown_classes2, config.unknown_classes3 = data_list['unknown_classes1'], data_list['unknown_classes2'], data_list['unknown_classes3']
+        config.unknown_classes = config.unknown_classes1 + config.unknown_classes2 + config.unknown_classes3
+    else:
+        config.unknown_classes = data_list['unknown_classes']
     print('config.class_num', config.class_num)   
 
     # setup logs 
@@ -57,7 +61,8 @@ if __name__ == '__main__':
     writer = SummaryWriter(logdir=model_dir)
     logger = create_logger(model_dir, log_name=opt.log_name)    
     logger.info('model dir: %s' % model_dir)
-
+    logger.info(f'dataset {opt.data}')
+    
     # save configs
     options_file = os.path.join(model_dir, 'options.json')
     with open(options_file, 'w') as fp:
@@ -73,7 +78,7 @@ if __name__ == '__main__':
             test_data_path, out_data_path, 
             opt, config)
     train_loader, val_loader, test_loader, out_loader = Data.train_loader, Data.val_loader, Data.test_loader, Data.out_loader
-    out_loader1, out_loader2, out_loader3 = Data.out_loader1, Data.out_loader2, Data.out_loader3
+    # out_loader1, out_loader2, out_loader3 = Data.out_loader1, Data.out_loader2, Data.out_loader3
 
     # setup trainer
     Trainer = PGTrainer(Data, device, config, opt, writer, logger, model_dir)   
@@ -101,20 +106,25 @@ if __name__ == '__main__':
             if len(augnets) > 0:
                 Trainer.tsne_augnet(epoch, augnets, Data.tsne_loader, run_type='tsne_augnet')
             
+            logger.info('----------------------------  train_set ----------------------------  ')
+            _ = Trainer.predict_set(train_loader, run_type='closed-set')
+            logger.info('----------------------------  val_set ----------------------------  ')
+            
             feature_known, _labels_k, _pred_k, test_perf = Trainer.predict_set(test_loader, run_type='closed-set')
-            out_perf, oscr_perf = Trainer.test_out(epoch, feature_known, _labels_k, _pred_k, out_loader, config.unknown_classes, 'out')
-            out_perf1, oscr_perf1 = Trainer.test_out(epoch, feature_known, _labels_k, _pred_k, out_loader1, config.unknown_classes1, 'out_seed')
-            out_perf2, oscr_perf2 = Trainer.test_out(epoch, feature_known, _labels_k, _pred_k, out_loader2, config.unknown_classes2, 'out_arch')
-            out_perf3, oscr_perf3 = Trainer.test_out(epoch, feature_known, _labels_k, _pred_k, out_loader3, config.unknown_classes3, 'out_data')
-            logger.info('epoch %d -> metric %s, closed-set: %.2f, unseen seed: %.2f, %.2f, unseen arch: %.2f, %.2f, unseeen dataset: %.2f, %.2f, unseen all: %.2f, %.2f' % 
-                            (epoch, config.metric, test_perf, out_perf1, oscr_perf1, out_perf2, oscr_perf2, out_perf3, oscr_perf3, out_perf, oscr_perf))
+            out_perf, oscr_perf, gcd_acc = Trainer.test_out(epoch, feature_known, _labels_k, _pred_k, out_loader, config.unknown_classes, 'out',cluster=True)
+            # out_perf1, oscr_perf1 = Trainer.test_out(epoch, feature_known, _labels_k, _pred_k, out_loader1, config.unknown_classes1, 'out_seed')
+            # out_perf2, oscr_perf2 = Trainer.test_out(epoch, feature_known, _labels_k, _pred_k, out_loader2, config.unknown_classes2, 'out_arch')
+            # out_perf3, oscr_perf3 = Trainer.test_out(epoch, feature_known, _labels_k, _pred_k, out_loader3, config.unknown_classes3, 'out_data')
+            logger.info('epoch %d -> metric %s, closed-set: %.2f, unseen all: %.2f, %.2f gcd_acc: %.2f' % 
+                            (epoch, config.metric, test_perf, out_perf, oscr_perf, gcd_acc))
             logger.info('----------------------------  testing end ----------------------------  ') 
 
             if (epoch+1) % config.save_interval == 0: 
-                save_suffix = 'model_{}_test{}_{}_AUC_{}_OSCR_{}.pth'.format(
+                save_suffix = 'model_{}_test{}_{}_AUC_{}_OSCR_{}_acc{}.pth'.format(
                                 epoch,
                                 test_perf,
                                 config.metric,
                                 out_perf,
-                                oscr_perf)
+                                oscr_perf,
+                                gcd_acc)
                 Trainer.save_model(epoch, save_suffix)

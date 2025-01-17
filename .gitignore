@@ -2,3 +2,4 @@ checkpoints/
 *cache*
 results/
 dataset/
+output.yaml

@@ -35,7 +35,7 @@ def read_annotations(data_path, debug=False, shuffle=True):
         sample_path = sample_path.replace('fanglingfei','yangtianyun')
         label = int(label)
         data.append((sample_path, label))        
-    # random.shuffle(data)
+    random.shuffle(data)
     if debug:
         data=data[:1000]
     return data

@@ -54,3 +54,137 @@ split5:
     val_collection: split5_val
     test_data_path: ./dataset/split5_test/annotations/split5_test.txt
     out_data_path: ./dataset/split5_test/annotations/split5_test_out.txt
+
+all_mix:
+    data_path: ./dataset/dif-gan
+    known_classes: ['real_celeba','real_imagenet', # seen real 2
+                  'ldm-text2im-large-256','controlnet-canny-sdxl-1.0','lcm-lora-sdv1-5','sd-turbo',
+                  'sdxl-turbo','stable-diffusion-xl-base-1.0',
+                  'stable-diffusion-xl-refiner-1.0','stable-diffusion-2-1', ## seen diffusion 8 from drct
+                  'stable_diffusion_v_1_4', ## seen diffusion 1 from gen image
+                  'styleGAN3','styleGAN','SNGAN','ProGAN','biggan' # 5 seen gan from pose
+                  ] # as the train classes
+    unknown_classes: ['real_coco', 'real_lsun', 'real_pose', 
+                      'ADM', 'stable_diffusion_v_1_5', 'glide',
+                      'wukong', 'VQDM', 'Midjourney', 
+                      'MMDGAN', 'SAGAN', 'S3GAN', 
+                      'FaceShifter', 'InfoMax-GAN', 'wav2lip', 
+                      'starGAN', 'FaceSwap', 'styleGAN2', 
+                      'ContraGAN', 'AttGAN', 'FSGAN', 
+                      'VAR']
+    train_collection: train
+    val_collection: val
+    test_data_path: ./dataset/dif-gan/test_know_data.txt
+    out_data_path: ./dataset/dif-gan/test_unknow_data.txt
+
+
+5g-5d-1r:
+    data_path: ./dataset/5gan-5dif-1real
+    known_classes: ['real_imagenet',
+                    'ldm-text2im-large-256','controlnet-canny-sdxl-1.0','lcm-lora-sdv1-5','sd-turbo',
+                    'sdxl-turbo',
+                    'styleGAN3','styleGAN','SNGAN','ProGAN','biggan' # 5 seen gan from pose
+                    ]
+    unknown_classes: ['real_celeba',
+                        'real_coco',
+                        'real_lsun',
+                        'real_pose',
+                        'stable-diffusion-xl-base-1.0',
+                        'stable-diffusion-xl-refiner-1.0',
+                        'stable-diffusion-2-1',
+                        'stable_diffusion_v_1_4',
+                        'ADM',
+                        'stable_diffusion_v_1_5',
+                        'glide',
+                        'wukong',
+                        'VQDM',
+                        'Midjourney',
+                        'MMDGAN',
+                        'SAGAN',
+                        'S3GAN',
+                        'FaceShifter',
+                        'InfoMax-GAN',
+                        'wav2lip',
+                        'starGAN',
+                        'FaceSwap',
+                        'styleGAN2',
+                        'ContraGAN',
+                        'AttGAN',
+                        'FSGAN',
+                        'VAR']
+    train_collection: 5gan-5dif-1real_train
+    val_collection: 5gan-5dif-1real_val
+    test_data_path: ./dataset/5gan-5dif-1real/test_know_data.txt
+    out_data_path: ./dataset/5gan-5dif-1real/test_unknow_data.txt
+
+2gan-3dif-1real:
+    data_path: ./dataset/2gan-3dif-1real
+    known_classes: [real_imagenet, ldm-text2im-large-256, controlnet-canny-sdxl-1.0,
+        sdxl-turbo, styleGAN3, styleGAN]
+    out_data_path: ./dataset/2gan-3dif-1real/test_unknow_data.txt
+    test_data_path: ./dataset/2gan-3dif-1real/test_know_data.txt
+    train_collection: 2gan-3dif-1real_train
+    unknown_classes: [real_celeba, real_coco, real_lsun, real_pose, lcm-lora-sdv1-5,
+        sd-turbo, stable-diffusion-xl-base-1.0, stable-diffusion-xl-refiner-1.0, stable-diffusion-2-1,
+        stable_diffusion_v_1_4, ADM, stable_diffusion_v_1_5, glide, wukong, VQDM,
+        Midjourney, SNGAN, ProGAN, MMDGAN, SAGAN, S3GAN, FaceShifter, InfoMax-GAN,
+        wav2lip, starGAN, biggan, FaceSwap, styleGAN2, ContraGAN, AttGAN, FSGAN, VAR]
+    val_collection: 2gan-3dif-1real_val
+
+5gan-9dif-2real:
+    data_path: ./dataset/5gan-9dif-2real
+    known_classes: [real_celeba, real_imagenet, ldm-text2im-large-256, controlnet-canny-sdxl-1.0,
+        lcm-lora-sdv1-5, sd-turbo, sdxl-turbo, stable-diffusion-xl-base-1.0, stable-diffusion-xl-refiner-1.0,
+        stable-diffusion-2-1, stable_diffusion_v_1_4, styleGAN3, styleGAN, SNGAN,
+        ProGAN, biggan]
+    out_data_path: ./dataset/5gan-9dif-2real/test_unknow_data.txt
+    test_data_path: ./dataset/5gan-9dif-2real/test_know_data.txt
+    train_collection: 5gan-9dif-2real_train
+    unknown_classes: [real_coco, real_lsun, real_pose, ADM, stable_diffusion_v_1_5,
+        glide, wukong, VQDM, Midjourney, MMDGAN, SAGAN, S3GAN, FaceShifter, InfoMax-GAN,
+        wav2lip, starGAN, FaceSwap, styleGAN2, ContraGAN, AttGAN, FSGAN, VAR]
+    val_collection: 5gan-9dif-2real_val
+
+5gan-5dif-2real:
+    data_path: ./dataset/5gan-5dif-2real
+    known_classes: [real_celeba, real_imagenet, ldm-text2im-large-256, controlnet-canny-sdxl-1.0,
+        lcm-lora-sdv1-5, sd-turbo, sdxl-turbo, styleGAN3, styleGAN, SNGAN, ProGAN,
+        biggan]
+    out_data_path: ./dataset/5gan-5dif-2real/test_unknow_data.txt
+    test_data_path: ./dataset/5gan-5dif-2real/test_know_data.txt
+    train_collection: 5gan-5dif-2real_train
+    unknown_classes: [real_coco, real_lsun, real_pose, stable-diffusion-xl-base-1.0,
+        stable-diffusion-xl-refiner-1.0, stable-diffusion-2-1, stable_diffusion_v_1_4,
+        ADM, stable_diffusion_v_1_5, glide, wukong, VQDM, Midjourney, MMDGAN, SAGAN,
+        S3GAN, FaceShifter, InfoMax-GAN, wav2lip, starGAN, FaceSwap, styleGAN2, ContraGAN,
+        AttGAN, FSGAN, VAR]
+    val_collection: 5gan-5dif-2real_val
+
+5gan-7dif-2real:
+    data_path: ./dataset/5gan-7dif-2real
+    known_classes: [real_celeba, real_imagenet, ldm-text2im-large-256, controlnet-canny-sdxl-1.0,
+        lcm-lora-sdv1-5, sd-turbo, sdxl-turbo, stable-diffusion-xl-refiner-1.0, stable-diffusion-2-1,
+        styleGAN3, styleGAN, SNGAN, ProGAN, biggan]
+    out_data_path: ./dataset/5gan-7dif-2real/test_unknow_data.txt
+    test_data_path: ./dataset/5gan-7dif-2real/test_know_data.txt
+    train_collection: 5gan-7dif-2real_train
+    unknown_classes: [real_coco, real_lsun, real_pose, stable-diffusion-xl-base-1.0,
+        stable_diffusion_v_1_4, ADM, stable_diffusion_v_1_5, glide, wukong, VQDM,
+        Midjourney, MMDGAN, SAGAN, S3GAN, FaceShifter, InfoMax-GAN, wav2lip, starGAN,
+        FaceSwap, styleGAN2, ContraGAN, AttGAN, FSGAN, VAR]
+    val_collection: 5gan-7dif-2real_val
+
+
+5gan-7dif-2mergereal:
+    data_path: ./dataset/5gan-7dif-2mergereal
+    known_classes: [real, ldm-text2im-large-256, controlnet-canny-sdxl-1.0, lcm-lora-sdv1-5,
+        sd-turbo, sdxl-turbo, stable-diffusion-xl-base-1.0, stable-diffusion-xl-refiner-1.0,
+        stable-diffusion-2-1, stable_diffusion_v_1_4, styleGAN3, styleGAN, SNGAN,
+        ProGAN, biggan]
+    out_data_path: ./dataset/5gan-7dif-2mergereal/test_unknow_data.txt
+    test_data_path: ./dataset/5gan-7dif-2mergereal/test_know_data.txt
+    train_collection: 5gan-7dif-2mergereal_train
+    unknown_classes: [real, ADM, stable_diffusion_v_1_5, glide, wukong, VQDM, Midjourney,
+        SAGAN, S3GAN, FaceShifter, InfoMax-GAN, wav2lip, starGAN, BigGAN, FaceSwap,
+        styleGAN2, ContraGAN, AttGAN, FSGAN, VAR]
+    val_collection: 5gan-7dif-2mergereal_val

@@ -7,6 +7,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
 from sklearn.cluster import KMeans, DBSCAN, MiniBatchKMeans
 from sklearn.metrics import accuracy_score, recall_score, f1_score
+from scipy.optimize import linear_sum_assignment as linear_assignment
 
 
 def evaluate_multiclass(gt_labels, pred_labels):
@@ -184,9 +185,12 @@ def metric_cluster(X_selected, n_clusters, y, cluster_method='kmeans'):
         Accuracy
     """
     if cluster_method == 'kmeans':
+        # cluster_alg = KMeans(n_clusters=n_clusters, init='k-means++', n_init=10, max_iter=300,
+        #              tol=0.0001, precompute_distances=True, verbose=0,
+        #              random_state=None, copy_x=True, n_jobs=1)
         cluster_alg = KMeans(n_clusters=n_clusters, init='k-means++', n_init=10, max_iter=300,
-                     tol=0.0001, precompute_distances=True, verbose=0,
-                     random_state=None, copy_x=True, n_jobs=1)
+                tol=0.0001, verbose=0,
+                random_state=None, copy_x=True)
     elif cluster_method == 'minibatch_kmeans':
         cluster_alg = MiniBatchKMeans(n_clusters=n_clusters, init='k-means++', max_iter=100, batch_size=2048)
     elif cluster_method == 'dbscan':
@@ -199,8 +203,8 @@ def metric_cluster(X_selected, n_clusters, y, cluster_method='kmeans'):
 
     # # from openworld-gan, same as above
     nmi, purity, ari = cluster_stats(y_predict, y)
-
-    return nmi, purity, ari
+    gcd_acc = compute_gcd_acc(y_predict,y)
+    return nmi, purity, ari, gcd_acc
 
 
 def cluster_stats(predicted, targets, save_path=None):
@@ -236,3 +240,26 @@ def cluster_stats(predicted, targets, save_path=None):
     nmi = normalized_mutual_info_score(targets, predicted) 
     ari = adjusted_rand_score(targets, predicted) 
     return nmi, avg_purity, ari
+
+def compute_gcd_acc(y_pred, y_true):
+    """
+    Calculate clustering accuracy. Require scikit-learn installed
+
+    # Arguments
+        y: true labels, numpy.array with shape `(n_samples,)`
+        y_pred: predicted labels, numpy.array with shape `(n_samples,)`
+
+    # Return
+        accuracy, in [0,1]
+    """
+    y_true = y_true.astype(int)
+    assert y_pred.size == y_true.size
+    D = max(y_pred.max(), y_true.max()) + 1
+    w = np.zeros((D, D), dtype=int)
+    for i in range(y_pred.size):
+        w[y_pred[i], y_true[i]] += 1
+
+    ind = linear_assignment(w.max() - w)
+    ind = np.vstack(ind).T
+
+    return sum([w[i, j] for i, j in ind]) * 1.0 / y_pred.size

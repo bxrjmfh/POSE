@@ -310,16 +310,16 @@ class PGTrainer():
         data.to_csv(os.path.join(self.model_dir, 'epoch-{}_{}_result_details.csv'.format(epoch, run_type)), header = 0)
         
         if cluster:
-            # calculate NMI, cluster_acc
+        #     # calculate NMI, cluster_acc
             features = np.concatenate([feature_known, feature_unknown])
             labels = np.concatenate([_labels_k,  _labels_u+len(_labels_k)])
             class_num = len(set(_labels_k)) + len(set(_labels_u))
-            NMI, cluster_acc, purity = metric_cluster(features, class_num, labels, self.config.cluster_method)
-            self.logger.info("NMI: {:.2f}, cluster_acc: {:.2f}, purity: {:.2f}".format(NMI, cluster_acc, purity))
+            NMI, cluster_acc, purity, gcd_acc = metric_cluster(features, class_num, labels, self.config.cluster_method)
+            self.logger.info("NMI: {:.2f}, cluster_acc: {:.2f}, purity: {:.2f}, gcd_acc {:.2f}".format(NMI, cluster_acc, purity, gcd_acc))
 
-        self.logger.info("AUC: {:.2f}, OSCR: {:.2f}".format(unknown_perf, _oscr_socre*100))
+            self.logger.info("AUC: {:.2f}, OSCR: {:.2f}".format(unknown_perf, _oscr_socre*100))
 
-        return unknown_perf, _oscr_socre*100
+        return unknown_perf, _oscr_socre*100, gcd_acc
 
 
     def save_model(self, epoch, save_suffix='model.pth'):
