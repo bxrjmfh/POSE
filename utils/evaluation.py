@@ -166,7 +166,7 @@ def compute_oscr(pred_k, pred_u, labels):
     return OSCR
 
 
-def metric_cluster(X_selected, n_clusters, y, cluster_method='kmeans'):
+def metric_cluster(X_selected, n_clusters, y, mask=None, cluster_method='kmeans'):
     """
     This function calculates ARI, ACC and NMI of clustering results
     Input
@@ -263,3 +263,25 @@ def compute_gcd_acc(y_pred, y_true):
     ind = np.vstack(ind).T
 
     return sum([w[i, j] for i, j in ind]) * 1.0 / y_pred.size
+
+def split_cluster_acc_v1(y_true, y_pred, mask):
+
+    """
+    Evaluate clustering metrics on two subsets of data, as defined by the mask 'mask'
+    (Mask usually corresponding to `Old' and `New' classes in GCD setting)
+    :param targets: All ground truth labels
+    :param preds: All predictions
+    :param mask: Mask defining two subsets
+    :return:
+    """
+
+    mask = mask.astype(bool)
+    y_true = y_true.astype(int)
+    y_pred = y_pred.astype(int)
+    weight = mask.mean()
+
+    old_acc = compute_gcd_acc(y_true[mask], y_pred[mask])
+    new_acc = compute_gcd_acc(y_true[~mask], y_pred[~mask])
+    total_acc = weight * old_acc + (1 - weight) * new_acc
+    print(f"total acc: {total_acc:.2f}, old acc: {old_acc:.2f}, new acc: {new_acc:.2f}")
+    return total_acc, old_acc, new_acc

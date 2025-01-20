@@ -7,7 +7,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from utils.common import plot_hist, plot_ROC_curve, read_annotations, load_config
-from utils.evaluation import evaluate_multiclass, metric_ood, compute_oscr
+from utils.evaluation import evaluate_multiclass, metric_ood, compute_oscr, metric_cluster
 from utils.config import Config
 from models.models import Simple_CNN
 from data.dataset import ImageDataset
@@ -45,7 +45,20 @@ def get_feature(model, dataloader, config, device, input_data):
     return features, labels, probs
 
 
-def calculate_open_set_result(_labels_k, _pred_k, _pred_u, save_dir):
+# def calculate_open_set_result(_labels_k, _pred_k, _pred_u, save_dir):
+    
+#     x1, x2 = np.max(_pred_k, axis=1), np.max(_pred_u, axis=1)
+#     out_results = metric_ood(x1, x2)['Bas'] # check
+#     _oscr_socre = compute_oscr(_pred_k, _pred_u, _labels_k)
+#     unknown_perf = round(out_results['AUROC'], 2)
+
+#     print("AUC, OSCR : {:.2f} {:.2f}".format(unknown_perf, _oscr_socre*100))
+
+#     # plot confidence histogram and ROC curve
+#     plot_hist(x1, x2, save_path = os.path.join(save_dir,'hist.png'))
+#     plot_ROC_curve(out_results, save_path = os.path.join(save_dir,'roc.png'))
+
+def calculate_open_set_result(_labels_k, _labels_u, _pred_k, _pred_u, known_classes, unknown_classes, save_dir):
     
     x1, x2 = np.max(_pred_k, axis=1), np.max(_pred_u, axis=1)
     out_results = metric_ood(x1, x2)['Bas'] # check
@@ -55,8 +68,21 @@ def calculate_open_set_result(_labels_k, _pred_k, _pred_u, save_dir):
     print("AUC, OSCR : {:.2f} {:.2f}".format(unknown_perf, _oscr_socre*100))
 
     # plot confidence histogram and ROC curve
+    os.makedirs(save_dir, exist_ok=True)
     plot_hist(x1, x2, save_path = os.path.join(save_dir,'hist.png'))
     plot_ROC_curve(out_results, save_path = os.path.join(save_dir,'roc.png'))
+    
+    # print detailed results for each unknown class
+    for i, label_u in enumerate(set(_labels_u)):
+        pred_u = _pred_u[_labels_u==label_u]
+        x1, x2 = np.max(_pred_k, axis=1), np.max(pred_u, axis=1)
+        pred = np.argmax(pred_u, axis=1)
+        pred_labels = list(set(pred))
+        pred_nums = [np.sum(pred==p) for p in pred_labels]
+        result = metric_ood(x1, x2, verbose=False)['Bas']
+        print("{}\t \t mostly pred class: {}\t \t average score: {}\t AUROC (%): {:.2f}".format(unknown_classes[i], 
+                                                                                 known_classes[pred_labels[np.argmax(pred_nums)]],
+                                                                                 np.mean(x2), result['AUROC']))
 
 
 def calculate_closed_set_result(known_prob, known_label):
@@ -81,7 +107,8 @@ def main():
     config = load_config('configs.{}'.format('progressive'))
     data_lists = Config(config_filepath='./configs/data_list.yaml')
     data_list = data_lists[args.data]
-    
+    known_classes = data_list['known_classes']
+    unknown_classes = data_list['unknown_classes']
     test_data_path, out_data_path = data_list['test_data_path'], data_list['out_data_path']
 
     close_set = ImageDataset(read_annotations(test_data_path), config, balance=False, test_mode=True)
@@ -103,7 +130,7 @@ def main():
         drop_last=False,
     )
 
-    model = Simple_CNN(class_num=15, out_feature_result=True)
+    model = Simple_CNN(class_num=len(data_list['known_classes']), out_feature_result=True)
     pretrained_dict = torch.load(args.model_path, map_location='cpu')['state_dict']
     model.load_state_dict(pretrained_dict)
     model = model.to(args.device)
@@ -116,8 +143,14 @@ def main():
     calculate_closed_set_result(known_prob, known_label)
 
     out_feature, out_label, out_prob  = get_feature(model, out_loader, config, args.device, args.input_data)
-    calculate_open_set_result(known_label, known_prob, out_prob, save_dir)
+    calculate_open_set_result(known_label, out_label, known_prob, out_prob, known_classes, unknown_classes, save_dir)
 
+    features = np.concatenate([known_feature, out_feature])
+    labels = np.concatenate([known_label,  out_label+len(set(known_label))]) # 存疑
+    class_num = len(set(known_label)) + len(set(out_label))
+    mask = np.zeros_like(labels, dtype=bool)
+    mask[:len(known_label)] = True
+    NMI, cluster_acc, purity, gcd_acc = metric_cluster(features, class_num, labels, mask, 'kmeans')
 
 if __name__=='__main__':
     main()
