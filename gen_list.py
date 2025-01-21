@@ -1,19 +1,16 @@
 import os
-known_classes= ['real_celeba','real_imagenet', # seen real 2
-                'ldm-text2im-large-256','controlnet-canny-sdxl-1.0','lcm-lora-sdv1-5','sd-turbo',
-                'sdxl-turbo','stable-diffusion-xl-base-1.0',
-                'stable-diffusion-xl-refiner-1.0','stable-diffusion-2-1', ## seen diffusion 8 from drct
-                'stable_diffusion_v_1_4', ## seen diffusion 1 from gen image
-                'styleGAN3','styleGAN','SNGAN','ProGAN','biggan' # 5 seen gan from pose
-                  ] # as the train classes
-unknown_classes= ['real_coco', 'real_lsun', 'real_pose', 
-                    'ADM', 'stable_diffusion_v_1_5', 'glide',
-                    'wukong', 'VQDM', 'Midjourney', 
-                    'MMDGAN', 'SAGAN', 'S3GAN', 
-                    'FaceShifter', 'InfoMax-GAN', 'wav2lip', 
-                    'starGAN', 'FaceSwap', 'styleGAN2', 
-                    'ContraGAN', 'AttGAN', 'FSGAN', 
-                    'VAR']
+known_classes= ["real_celeba", "real_imagenet", "ldm-text2im-large-256",
+                "controlnet-canny-sdxl-1.0", "lcm-lora-sdv1-5", "sd-turbo",
+                "sdxl-turbo", "styleGAN3", "styleGAN", "SNGAN", "ProGAN", "biggan"]
+
+# unknown_classes= ['real_coco', 'real_lsun', 'real_pose', 
+#                     'ADM', 'stable_diffusion_v_1_5', 'glide',
+#                     'wukong', 'VQDM', 'Midjourney', 
+#                     'MMDGAN', 'SAGAN', 'S3GAN', 
+#                     'FaceShifter', 'InfoMax-GAN', 'wav2lip', 
+#                     'starGAN', 'FaceSwap', 'styleGAN2', 
+#                     'ContraGAN', 'AttGAN', 'FSGAN', 
+#                     'VAR']
 
 eval_classes= ['real_celeba','real_imagenet','real_coco','real_lsun','real_pose', # seen real 2 + unseen 3 = 5
                 'ldm-text2im-large-256','controlnet-canny-sdxl-1.0','lcm-lora-sdv1-5','sd-turbo',
@@ -29,7 +26,7 @@ eval_classes= ['real_celeba','real_imagenet','real_coco','real_lsun','real_pose'
                 ]
 base_dir = './dataset/' # data base
 data_base_dir = './dataset/dif-gan/mix_data_new'
-exp_name = '5gan-7dif-2mergereal'
+exp_name = '5gan-5dif-2mergereal'
 
 unknown_classes = [x for x in eval_classes if x not in known_classes]
 
@@ -99,17 +96,22 @@ with open(f'/home/lihao/python_proj/AIGC_2025/others_work/POSE/dataset/{exp_name
     f.writelines(val_res)
     
 # eval
-print('---collecting eval train ---')
+unknown_real = unknown_test_data_d.pop('real')
+known_test_data_d['real'] += unknown_real
+
+print('---collecting test train ---')
 tn_res = []
 tu_res = []
 for i,n in enumerate(known_test_data_d):
     random.seed(0)
     li = random.sample(known_test_data_d[n],k=num_test)
+    if n == 'real':
+        count_real_classes_in_list(li, eval_classes)
     print(f"{n}: {len(li)}")
     for it in li:
         tn_res.append(f"{it}\t{i}\n")
         
-print('---collecting eval unseen ---')
+print('---collecting test unseen ---')
 for i,n in enumerate(unknown_test_data_d):
     random.seed(0)
     li = random.sample(unknown_test_data_d[n],k=num_test)
