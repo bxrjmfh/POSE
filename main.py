@@ -120,11 +120,12 @@ if __name__ == '__main__':
             logger.info('----------------------------  testing end ----------------------------  ') 
 
             if (epoch+1) % config.save_interval == 0: 
-                save_suffix = 'model_{}_test{}_{}_AUC_{}_OSCR_{}_acc{}.pth'.format(
-                                epoch,
-                                test_perf,
-                                config.metric,
-                                out_perf,
-                                oscr_perf,
-                                gcd_acc)
+                save_suffix = 'model_{:02d}_test{:.2f}_{}_AUC_{:.2f}_OSCR_{:.2f}_acc{:.2f}.pth'.format(
+                    epoch,
+                    test_perf,
+                    config.metric,
+                    out_perf,
+                    oscr_perf,
+                    gcd_acc
+                )
                 Trainer.save_model(epoch, save_suffix)

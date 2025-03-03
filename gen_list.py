@@ -20,7 +20,7 @@ eval_classes= ['real_celeba','real_imagenet','real_coco','real_lsun','real_pose'
                 'ADM','stable_diffusion_v_1_5','glide','wukong','VQDM','Midjourney', ## unseen diffusion from genimage 6
                 'styleGAN3','styleGAN','SNGAN','ProGAN','biggan', # 5 seen gan from pose
                 'SAGAN','S3GAN','FaceShifter','InfoMax-GAN',
-                'wav2lip','starGAN','BigGAN','FaceSwap',
+                'wav2lip','starGAN','FaceSwap',
                 'styleGAN2','ContraGAN','AttGAN','FSGAN', # 12 unseen gan from pose
                 'VAR' # unseen arch 1
                 ]

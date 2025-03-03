@@ -150,8 +150,11 @@ def main():
     class_num = len(set(known_label)) + len(set(out_label))
     mask = np.zeros_like(labels, dtype=bool)
     mask[:len(known_label)] = True
-    NMI, cluster_acc, purity, gcd_acc = metric_cluster(features, class_num, labels, mask, 'kmeans')
-
+    NMI, cluster_acc, purity, gcd_acc_v1, gcd_acc_v2 = metric_cluster(features, class_num, labels, mask, 'kmeans')
+    # print(f"NMI: {NMI}, cluster acc: {cluster_acc}, purity: {purity}")
+    # all_acc, old_acc, new_acc = 
+    # print(f"all acc: {all_acc}, old acc: {old_acc}, new acc: {new_acc}")
+    
 if __name__=='__main__':
     main()
 

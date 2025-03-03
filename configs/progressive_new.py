@@ -6,7 +6,7 @@ class Config(object):
     init_lr_E = 1e-4
     step_size = 500
     gamma = 0.9
-    max_epochs = 30
+    max_epochs = 40
     loss = 'Softmax'
     temp = 0.1
 

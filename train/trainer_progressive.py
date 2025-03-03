@@ -313,12 +313,15 @@ class PGTrainer():
         #     # calculate NMI, cluster_acc
             features = np.concatenate([feature_known, feature_unknown])
             labels = np.concatenate([_labels_k,  _labels_u+len(set(_labels_k))])
+            mask = np.zeros_like(labels, dtype=bool)
+            mask[:len(_labels_k)] = True
             class_num = len(set(_labels_k)) + len(set(_labels_u))
-            NMI, cluster_acc, purity, gcd_acc = metric_cluster(features, class_num, labels, self.config.cluster_method)
+            NMI, cluster_acc, purity, gcd_acc1, gcd_acc2 = metric_cluster(features, class_num, labels, mask, self.config.cluster_method)
+            gcd_acc = gcd_acc2[0]
+            
             self.logger.info("NMI: {:.2f}, cluster_acc: {:.2f}, purity: {:.2f}, gcd_acc {:.2f}".format(NMI, cluster_acc, purity, gcd_acc))
 
             self.logger.info("AUC: {:.2f}, OSCR: {:.2f}".format(unknown_perf, _oscr_socre*100))
-
         return unknown_perf, _oscr_socre*100, gcd_acc
 
 

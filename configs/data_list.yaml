@@ -212,5 +212,5 @@ all_mix:
     unknown_classes: [stable-diffusion-xl-base-1.0, stable-diffusion-xl-refiner-1.0,
         stable-diffusion-2-1, stable_diffusion_v_1_4, ADM, stable_diffusion_v_1_5,
         glide, wukong, VQDM, Midjourney, SAGAN, S3GAN, FaceShifter, InfoMax-GAN, wav2lip,
-        starGAN, BigGAN, FaceSwap, styleGAN2, ContraGAN, AttGAN, FSGAN, VAR]
+        starGAN, FaceSwap, styleGAN2, ContraGAN, AttGAN, FSGAN, VAR]
     val_collection: 5gan-5dif-2mergereal_val
