@@ -166,7 +166,7 @@ def compute_oscr(pred_k, pred_u, labels):
     return OSCR
 
 
-def metric_cluster(X_selected, n_clusters, y, mask=None, cluster_method='kmeans', acc='v1'):
+def metric_cluster(X_selected, n_clusters, y, mask=None, cluster_method='kmeans', class_names=None):
     """
     This function calculates ARI, ACC and NMI of clustering results
     Input
@@ -204,7 +204,7 @@ def metric_cluster(X_selected, n_clusters, y, mask=None, cluster_method='kmeans'
     # # from openworld-gan, same as above
     nmi, purity, ari = cluster_stats(y_predict, y)
     gcd_acc_v1 = split_cluster_acc_v1(y_predict,y,mask)
-    gcd_acc_v2 = split_cluster_acc_v2(y_predict,y,mask)
+    gcd_acc_v2 = split_cluster_acc_v2(y_predict,y,mask,classes_names=class_names)
     return nmi, purity, ari, gcd_acc_v1, gcd_acc_v2
 
 
@@ -287,7 +287,7 @@ def split_cluster_acc_v1(y_true, y_pred, mask):
     print(f"accv1: total acc: {total_acc:.2f}, old acc: {old_acc:.2f}, new acc: {new_acc:.2f}")
     return total_acc, old_acc, new_acc
 
-def split_cluster_acc_v2(y_true, y_pred, mask):
+def split_cluster_acc_v2(y_true, y_pred, mask, classes_names=None):
     """
     Calculate clustering accuracy. Require scikit-learn installed
     First compute linear assignment on all data, then look at how good the accuracy is on subsets
@@ -306,7 +306,7 @@ def split_cluster_acc_v2(y_true, y_pred, mask):
     new_classes_gt = set(y_true[~mask])
 
     assert y_pred.size == y_true.size
-    D = max(y_pred.max(), y_true.max()) + 1
+    D = max(y_pred.max(), y_true.max()) + 1 # debug check
     w = np.zeros((D, D), dtype=int)
     for i in range(y_pred.size):
         w[y_pred[i], y_true[i]] += 1
@@ -314,7 +314,13 @@ def split_cluster_acc_v2(y_true, y_pred, mask):
     ind = linear_assignment(w.max() - w)
     ind = np.vstack(ind).T
 
-    ind_map = {j: i for i, j in ind}
+    ind_map = {j: i for i, j in ind} # map the real to perd label 
+    if classes_names:
+        # assert len(classes_names) == len(old_classes_gt) + len(new_classes_gt)
+        for k in ind_map:
+            map_k = ind_map[k]
+            every_class_acc = w[map_k,k] *1.0/ w[:,k].sum()
+            print("{} acc: {:.2f}".format(classes_names[k],every_class_acc))
     total_acc = sum([w[i, j] for i, j in ind]) * 1.0 / y_pred.size
 
     old_acc = 0

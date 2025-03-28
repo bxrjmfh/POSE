@@ -85,11 +85,17 @@ def calculate_open_set_result(_labels_k, _labels_u, _pred_k, _pred_u, known_clas
                                                                                  np.mean(x2), result['AUROC']))
 
 
-def calculate_closed_set_result(known_prob, known_label):
+def calculate_closed_set_result(known_prob, known_label, classes_names=None):
     pred_labels = np.argmax(known_prob, axis=1)
     results = evaluate_multiclass(known_label, pred_labels)
     CM = confusion_matrix(known_label, pred_labels)
     perf = round(results['acc'], 4)*100
+    
+    if classes_names:
+        # assert len(classes_names) == len(old_classes_gt) + len(new_classes_gt)
+        for i,name in enumerate(classes_names):
+            every_class_acc = CM[i,i] *1.0/ CM[i].sum()
+            print("{} acc: {:.2f}".format(classes_names[i],every_class_acc))
     print('closed_set accuracy', perf)
     print(CM)
 
@@ -140,7 +146,7 @@ def main():
     os.makedirs(save_dir, exist_ok=True)
     
     known_feature, known_label, known_prob  = get_feature(model, close_loader, config, args.device, args.input_data)
-    calculate_closed_set_result(known_prob, known_label)
+    calculate_closed_set_result(known_prob, known_label, classes_names=known_classes)
 
     out_feature, out_label, out_prob  = get_feature(model, out_loader, config, args.device, args.input_data)
     calculate_open_set_result(known_label, out_label, known_prob, out_prob, known_classes, unknown_classes, save_dir)
@@ -150,7 +156,7 @@ def main():
     class_num = len(set(known_label)) + len(set(out_label))
     mask = np.zeros_like(labels, dtype=bool)
     mask[:len(known_label)] = True
-    NMI, cluster_acc, purity, gcd_acc_v1, gcd_acc_v2 = metric_cluster(features, class_num, labels, mask, 'kmeans')
+    NMI, cluster_acc, purity, gcd_acc_v1, gcd_acc_v2 = metric_cluster(features, class_num, labels, mask, 'kmeans',class_names=known_classes+unknown_classes)
     # print(f"NMI: {NMI}, cluster acc: {cluster_acc}, purity: {purity}")
     # all_acc, old_acc, new_acc = 
     # print(f"all acc: {all_acc}, old acc: {old_acc}, new acc: {new_acc}")

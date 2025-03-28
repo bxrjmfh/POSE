@@ -214,3 +214,14 @@ all_mix:
         glide, wukong, VQDM, Midjourney, SAGAN, S3GAN, FaceShifter, InfoMax-GAN, wav2lip,
         starGAN, FaceSwap, styleGAN2, ContraGAN, AttGAN, FSGAN, VAR]
     val_collection: 5gan-5dif-2mergereal_val
+
+5gan-5dif:
+    data_path: ./dataset/5gan-5dif
+    known_classes: [ldm-text2im-large-256, controlnet-canny-sdxl-1.0, lcm-lora-sdv1-5,
+        sd-turbo, sdxl-turbo, styleGAN3, styleGAN, SNGAN, ProGAN, biggan]
+    out_data_path: ./dataset/5gan-5dif/test_unknow_data.txt
+    test_data_path: ./dataset/5gan-5dif/test_know_data.txt
+    train_collection: 5gan-5dif_train
+    unknown_classes: [VAR]
+    val_collection: 5gan-5dif_val
+

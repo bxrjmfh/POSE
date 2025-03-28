@@ -1,5 +1,5 @@
 import os
-known_classes= ["real_celeba", "real_imagenet", "ldm-text2im-large-256",
+known_classes= [ "ldm-text2im-large-256",
                 "controlnet-canny-sdxl-1.0", "lcm-lora-sdv1-5", "sd-turbo",
                 "sdxl-turbo", "styleGAN3", "styleGAN", "SNGAN", "ProGAN", "biggan"]
 
@@ -12,21 +12,13 @@ known_classes= ["real_celeba", "real_imagenet", "ldm-text2im-large-256",
 #                     'ContraGAN', 'AttGAN', 'FSGAN', 
 #                     'VAR']
 
-eval_classes= ['real_celeba','real_imagenet','real_coco','real_lsun','real_pose', # seen real 2 + unseen 3 = 5
-                'ldm-text2im-large-256','controlnet-canny-sdxl-1.0','lcm-lora-sdv1-5','sd-turbo',
-                'sdxl-turbo','stable-diffusion-xl-base-1.0',
-                'stable-diffusion-xl-refiner-1.0','stable-diffusion-2-1', ## seen diffusion 8 from drct
-                'stable_diffusion_v_1_4', ## seen diffusion 1 from gen image (total 9 seen)
-                'ADM','stable_diffusion_v_1_5','glide','wukong','VQDM','Midjourney', ## unseen diffusion from genimage 6
-                'styleGAN3','styleGAN','SNGAN','ProGAN','biggan', # 5 seen gan from pose
-                'SAGAN','S3GAN','FaceShifter','InfoMax-GAN',
-                'wav2lip','starGAN','FaceSwap',
-                'styleGAN2','ContraGAN','AttGAN','FSGAN', # 12 unseen gan from pose
-                'VAR' # unseen arch 1
-                ]
+eval_classes= [ "ldm-text2im-large-256",
+                "controlnet-canny-sdxl-1.0", "lcm-lora-sdv1-5", "sd-turbo",
+                "sdxl-turbo", "styleGAN3", "styleGAN", "SNGAN", "ProGAN", "biggan",'VAR']
+
 base_dir = './dataset/' # data base
 data_base_dir = './dataset/dif-gan/mix_data_new'
-exp_name = '5gan-5dif-2mergereal'
+exp_name = '5gan-5dif'
 
 unknown_classes = [x for x in eval_classes if x not in known_classes]
 
@@ -45,6 +37,8 @@ def merge_real(classes,split,data_base_dir):
             d['real'] += [os.path.join(path,it) for it in data_li]
         else:
             d[k] = [os.path.join(path,it) for it in data_li]
+    if d['real'] == []:
+        d.pop('real')
     return d
 
 
@@ -52,6 +46,9 @@ known_data_d = merge_real(known_classes,'train',data_base_dir)
 known_test_data_d = merge_real(known_classes,'eval',data_base_dir)
 unknown_test_data_d = merge_real(unknown_classes,'eval',data_base_dir)
 
+print(f"known data d: {len(known_data_d)}")
+print(f"known test data d: {len(known_test_data_d)}")
+print(f"unknown test data d: {len(unknown_test_data_d)}")
 
 import random
 # train
@@ -96,8 +93,9 @@ with open(f'/home/lihao/python_proj/AIGC_2025/others_work/POSE/dataset/{exp_name
     f.writelines(val_res)
     
 # eval
-unknown_real = unknown_test_data_d.pop('real')
-known_test_data_d['real'] += unknown_real
+if 'real' in unknown_test_data_d:
+    unknown_real = unknown_test_data_d.pop('real')
+    known_test_data_d['real'] += unknown_real
 
 print('---collecting test train ---')
 tn_res = []
